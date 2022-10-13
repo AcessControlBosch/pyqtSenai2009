@@ -77,6 +77,7 @@ class Connection:
         self.nameColadorador = ''
         self.idColadorador = ''
         self.idCardColadorador = ''
+        self.idReleaseMachine = ''
 
     #Veriica se o usuario esta no banco de dados
     def pesquisar_colaborador(self, idcard):
@@ -145,18 +146,18 @@ class Connection:
         #---------------- TIPOS DE USUÁRIOS -------------
 
         # --------------- users com skill2
-        if self.jobposition['typeJob'] == "Aprendiz" and self.skill2 == True:
-            return ['apskill2', self.idCardColadorador, self.edvColadorador, self.nameColadorador, self.dataNascFormat2]
+        if self.jobposition['typeJob'] == "Aprendiz" and self.skill2 == True or self.jobposition['typeJob'] == "Meio Oficial" and self.skill2 == True:
+            return ['n2', self.idCardColadorador, self.edvColadorador, self.nameColadorador, self.dataNascFormat2]
 
-        elif self.jobposition['typeJob'] == "Meio Oficial" and self.skill2 == True:
-            return ['moskill2', self.idCardColadorador, self.edvColadorador, self.nameColadorador, self.dataNascFormat2]
+        # elif self.jobposition['typeJob'] == "Meio Oficial" and self.skill2 == True:
+        #     return ['moskill2', self.idCardColadorador, self.edvColadorador, self.nameColadorador, self.dataNascFormat2]
 
         #-------------- users com skill1
-        elif self.jobposition['typeJob'] == "Aprendiz":
-            return ['ap', self.idCardColadorador, self.edvColadorador, self.nameColadorador, self.dataNascFormat2]
+        elif self.jobposition['typeJob'] == "Aprendiz" or self.jobposition['typeJob'] == "Meio Oficial":
+            return ['n1', self.idCardColadorador, self.edvColadorador, self.nameColadorador, self.dataNascFormat2]
 
-        elif self.jobposition['typeJob'] == "Meio Oficial":
-            return ['mo', self.idCardColadorador, self.edvColadorador, self.nameColadorador, self.dataNascFormat2]
+        # elif self.jobposition['typeJob'] == "Meio Oficial":
+        #     return ['mo', self.idCardColadorador, self.edvColadorador, self.nameColadorador, self.dataNascFormat2]
 
         #------------ adm e manutentor
         elif self.jobposition['typeJob'] == "Manutentor":
@@ -176,9 +177,6 @@ class Connection:
         cursor.close()
         print("lista:",lista)
         return lista
-
-    # def edv(self, edv):
-    #     return edv
 
     def adicionar_cadastro(self, tag_cartao, nome, classe, edv, datanasc, cargo):
         cursor = self.banco.cursor()
@@ -246,7 +244,6 @@ class Standby(QMainWindow, Ui_Standby):  # primeira tela que faz a validação d
     def mousePressEvent(self, e):
         self.lineEdit_tag.setFocus()
         print("Cliquei")
-
     def comeca(self):
         #O programa começa aqui
         tag = self.lineEdit_tag.text()
@@ -273,13 +270,13 @@ class Standby(QMainWindow, Ui_Standby):  # primeira tela que faz a validação d
             pass
 
     def configurar(self):
-        if (self.colaboradorB[0] == 'apskill2' or self.colaboradorB[0] == 'moskill2'):
+        if (self.colaboradorB[0] == 'n2'):
             Menu01_skill2.Label_Colaborador.setText(f'COLABORADOR: {self.colaborador2[0]} {self.colaborador2[-1]}')
             Menu01_skill2.Label_EDV.setText(f"EDV: {self.colaboradorB[2]}")
             standby.hide()
             Menu01_skill2.show()
 
-        elif (self.colaboradorB[0] == 'ap' or self.colaboradorB[0] == 'mo'):
+        elif (self.colaboradorB[0] == 'n1'):
             Menu01Aprendiz.Label_Colaborador.setText(f'COLABORADOR: {self.colaborador2[0]} {self.colaborador2[-1]}')
             Menu01Aprendiz.Label_EDV.setText(f"EDV: {self.colaboradorB[2]}")
             standby.hide()
@@ -294,11 +291,11 @@ class Standby(QMainWindow, Ui_Standby):  # primeira tela que faz a validação d
             Menu01.show()
 
     def sairMenu(self):
-        if (self.colaboradorB[0] == 'ap' or self.colaboradorB[0] == 'mo' or self.colaboradorB[0] == 'ahk'):
+        if (self.colaboradorB[0] == 'n1'):
              Menu01Aprendiz.hide()
              standby.show()
 
-        elif(self.colaboradorB[0] == 'apskill2' or self.colaboradorB[0] == 'moskill2'):
+        elif(self.colaboradorB[0] == 'n2'):
              Menu01_skill2.hide()
              standby.show()
 
@@ -307,24 +304,85 @@ class Standby(QMainWindow, Ui_Standby):  # primeira tela que faz a validação d
             standby.show()
 
     def homeShow(self):
-        if (self.colaboradorB[0] == 'ap' or self.colaboradorB[0] == 'mo'):
+        if (self.colaboradorB[0] == 'n1'):
              Menu01Aprendiz.show()
 
-        elif(self.colaboradorB[0] == 'apskill2' or self.colaboradorB[0] == 'moskill2'):
+        elif(self.colaboradorB[0] == 'n2'):
              Menu01_skill2.show()
 
         else:
             Menu01.show()
 
     def homeHide(self):
-        if (self.colaboradorB[0] == 'ap' or self.colaboradorB[0] == 'mo'):
+        if (self.colaboradorB[0] == 'n1'):
              Menu01Aprendiz.hide()
 
-        elif(self.colaboradorB[0] == 'apskill2' or self.colaboradorB[0] == 'moskill2'):
+        elif(self.colaboradorB[0] == 'n2'):
              Menu01_skill2.hide()
 
         else:
             Menu01.show()
+
+class Sair():
+    def sair(self):
+        if (standby.classeColaborador == 'n1'):
+            if (Menu01Aprendiz.maquina_liberada == False):
+                standby.sairMenu()
+            else:
+                self.sairBanco()
+
+        if (standby.classeColaborador == 'n2'):
+            if (Menu01_skill2.maquina_liberada == False):
+                standby.sairMenu()
+
+            else:
+                self.sairBanco()
+
+        else:
+            if(Menu01.maquina_liberada == False):
+                standby.sairMenu()
+            else:
+                self.sairBanco()
+
+    def sairBanco(self):
+        url = banco_dados.url + 'releasemachines/' + str(banco_dados.idReleaseMachine) + '/'
+
+        print('url sair banco', url)
+        try:
+            hora = datetime.today().strftime('%H:%M:%S:%f')
+
+            url = banco_dados.url + 'releasemachines/' + str(banco_dados.idReleaseMachine) + '/'
+
+            print('url sair banco',url )
+            patch = {
+                "FinishHour": hora,
+            }
+
+            urlpost = requests.patch(url, patch)
+
+            print('patch sair release machine:', urlpost.status_code)
+
+            if (urlpost.status_code == 200):
+                try:
+
+                    urlMachine = banco_dados.url + 'machines/1/'
+
+                    patch2 = {
+                        "status": False,
+                    }
+
+                    urlPut = requests.patch(urlMachine, patch2)
+
+                    print('patch Desl', urlPut.status_code)
+
+                    if (urlPut.status_code == 200):
+                        standby.lineEdit_tag.setText("")
+                        standby.sairMenu()
+                        standby.show()
+                except:
+                    print(urlPut.status_code)
+        except:
+            print(urlpost.status_code)
 
 ##################### MENU 01 ################################
 class Primeiro_Menu(QMainWindow, Ui_Menu01):
@@ -377,6 +435,8 @@ class Primeiro_MenuSkill(QMainWindow, Ui_Menu01_skill2):
         self.Botao_Interface_Didatica.clicked.connect(self.interface_didatica)
         self.Botao_Documentos.clicked.connect(self.menu_documentos) #DEFINE A FUNÇÃO QUE SERÁ CHAMADA QUANDO O BOTÃO DE DOCUMENTOS FOR CLICADO.
         self.Botao_Registros.clicked.connect(self.menu_registros)
+        self.Botao_Sair.clicked.connect(self.sairFunc)
+
         # self.Label_Colaborador.setText(f"COLABORADOR: {colaborador}") #DEFINE A LABEL COM O NOME DO COLABORADOR.
         # self.Label_EDV.setText(f"EDV: {edv}") #DEFINE A LABEL COM O EDV DO COLABORADOR.
 
@@ -407,6 +467,29 @@ class Primeiro_MenuSkill(QMainWindow, Ui_Menu01_skill2):
         registros_menu.show()
         Menu01_skill2.hide()
 
+    def sairFunc(self):
+        sairDef.sair()
+        # Menu01Aprendiz.maquina_liberada = False
+        self.clear_checkboxes()
+        standby.lineEdit_tag.setText("")
+        standby.label_titulo.setText("APROXIME O CRACHÁ\nSOBRE O LEITOR")
+        """""  
+        GPIO.output(Alimentacao_maquina, False) 
+        GPIO.output(led, True)   
+        """""
+
+    def clear_checkboxes(self):
+        Menu01Aprendiz.maquina_liberada = False
+        self.checkboxes = [liberacao_seguranca.checkBox_1, liberacao_seguranca.checkBox_2,
+                           liberacao_seguranca.checkBox_3,
+                           liberacao_seguranca.checkBox_4, liberacao_seguranca.checkBox_5,
+                           liberacao_seguranca.checkBox_6,
+                           liberacao_seguranca.checkBox_7, liberacao_seguranca.checkBox_8,
+                           liberacao_seguranca.checkBox_9,
+                           liberacao_meio_ambiente.checkBox_1]
+        for i in self.checkboxes:
+            i.setChecked(False)
+        Menu01Aprendiz.Botao_Liberar_Maquina.setIcon(self.cadeado_fechado)
 class Segundo_Menu(QMainWindow, Ui_Menu02):  # SEGUNDO MENU
     def __init__(self):
         super().__init__()
@@ -471,6 +554,8 @@ class Liberacao_atencao(QMainWindow, Ui_Atencao):
         liberacao_atencao.hide()
         standby.configurar()
 
+
+
 ##################### MENU 01 APRENDIZ ################################
 class Primeiro_MenuAPRENDIZ(QMainWindow, Ui_Menu01Aprendiz):
     def __init__(self): #FUNÇÃO QUE INICIA A TELA E DECLARA OS BOTÕES,LABELS,ETC.
@@ -512,7 +597,8 @@ class Primeiro_MenuAPRENDIZ(QMainWindow, Ui_Menu01Aprendiz):
         Menu01Aprendiz.hide()
 
     def sairFunc(self):
-        Menu01Aprendiz.maquina_liberada = False
+        sairDef.sair()
+        # Menu01Aprendiz.maquina_liberada = False
         self.clear_checkboxes()
         standby.lineEdit_tag.setText("")
         standby.label_titulo.setText("APROXIME O CRACHÁ\nSOBRE O LEITOR")
@@ -520,7 +606,7 @@ class Primeiro_MenuAPRENDIZ(QMainWindow, Ui_Menu01Aprendiz):
         GPIO.output(Alimentacao_maquina, False) 
         GPIO.output(led, True)   
         """""
-        sairDef.sair()
+        # sairDef.sair()
 
     def clear_checkboxes(self):
         Menu01Aprendiz.maquina_liberada = False
@@ -535,54 +621,7 @@ class Primeiro_MenuAPRENDIZ(QMainWindow, Ui_Menu01Aprendiz):
             i.setChecked(False)
         Menu01Aprendiz.Botao_Liberar_Maquina.setIcon(self.cadeado_fechado)
 
-class Sair():
-    def sair(self):
-        if (standby.classeColaborador == 'ap' or colaborador[0] == 'mo' or colaborador[0] == 'ahk'):
-            if (Menu01Aprendiz.maquina_liberada == False):
-                standby.sairMenu()
-            else:
-                self.sairBanco()
-        else:
-            if(Menu01.maquina_liberada == False):
-                standby.sairMenu()
-            else:
-                self.sairBanco()
 
-    def sairBanco(self):
-
-        try:
-            hora = datetime.today().strftime('%H:%M:%S:%f')
-
-            url = banco_dados.url + 'releasemachines/1/'
-            patch = {
-                "hourFinish": hora,
-            }
-
-            urlpost = requests.patch(url, patch)
-
-            print(urlpost.status_code)
-
-            if (urlpost.status_code == 200):
-                try:
-
-                    urlMachine = banco_dados.url + 'machines/1/'
-
-                    patch2 = {
-                        "status": False,
-                    }
-
-                    urlPut = requests.patch(urlMachine, patch2)
-
-                    print('patch Desl', urlPut.status_code)
-
-                    if (urlPut.status_code == 200):
-                        standby.lineEdit_tag.setText("")
-                        standby.sairMenu()
-                        standby.show()
-                except:
-                    print(urlPut.status_code)
-        except:
-            print(urlpost.status_code)
 
 class Liberacao_seguranca(QMainWindow, Ui_Liberacao_Seguranca):
     def __init__(self):
@@ -741,7 +780,6 @@ class Liberacao_meio_ambiente(QMainWindow, Ui_Liberacao_Meio_Ambiente):
         self.botao_continuar.clicked.connect(self.resposta)
         self.img2 = QIcon ("imagens/CADEADO_ABERTO.png")
 
-
     def home(self):
         liberacao_meio_ambiente.hide()
         standby.configurar()
@@ -749,8 +787,13 @@ class Liberacao_meio_ambiente(QMainWindow, Ui_Liberacao_Meio_Ambiente):
 
     def resposta(self):
         if self.checkBox_1.isChecked():
-            if (standby.classeColaborador == 'ap' or colaborador[0] == 'mo' or colaborador[0] == 'ahk'):
+
+            #classeColaborador é o variável da classe standby
+            if (standby.classeColaborador == 'n1'):
                 Menu01Aprendiz.maquina_liberada = True
+
+            elif (standby.classeColaborador == 'n2'):
+                Menu01_skill2.maquina_liberada = True
 
             else:
                 Menu01.maquina_liberada = True
@@ -776,7 +819,10 @@ class Liberacao_meio_ambiente(QMainWindow, Ui_Liberacao_Meio_Ambiente):
 
                 if(urlpost.status_code==200):
                     try:
+                        urlID = urlpost.json()
+                        print(urlID[0]['id'])
 
+                        banco_dados.idReleaseMachine = urlID[0]['id']
 
                         urlMachine = banco_dados.url + 'machines/1/'
                         patch = {
@@ -788,10 +834,15 @@ class Liberacao_meio_ambiente(QMainWindow, Ui_Liberacao_Meio_Ambiente):
                         print('put', urlPut.status_code)
 
                         if(urlPut.status_code==200):
-                            if (standby.classeColaborador == 'ap' or colaborador[0] == 'mo' or colaborador[0] == 'ahk'):
+                            if (standby.classeColaborador == 'n1'):
                                 Menu01Aprendiz.Botao_Liberar_Maquina.setIcon(self.img2)
                                 liberacao_meio_ambiente.hide()
                                 Menu01Aprendiz.show()
+
+                            elif (standby.classeColaborador == 'n2'):
+                                Menu01_skill2.Botao_Liberar_Maquina.setIcon(self.img2)
+                                liberacao_meio_ambiente.hide()
+                                Menu01_skill2.show()
 
                             else:
                                 Menu01.Botao_Liberar_Maquina.setIcon(self.img2)

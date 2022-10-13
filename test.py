@@ -4,12 +4,12 @@ from socket import gethostname
 import socket
 def getData():
 
-    print('hostname:', socket.gethostname())
-
-    # print(socket.SocketType)
+    # print('hostname:', socket.gethostname())
     #
-    url = requests.get('http://localhost:8000/usersid/412177/')
-    print(url)
+    # # print(socket.SocketType)
+    # #
+    # url = requests.get('http://localhost:8000/usersid/412177/')
+    # print(url)
     #
     # urll = 'http://localhost:8000/users/'
     # urll2 = 'http://localhost:8000/users/11/'
@@ -104,14 +104,30 @@ def getData():
     #
     # print('patch Desl', urlPut)
 
-    # print(socket.gethostbyaddr)
-    datanasc = '28/09/2022'
-    print('1:', type(datanasc))
-    dataNascFormat = datetime.strptime(datanasc, '%d/%m/%Y').date()
-    print('2:', type(dataNascFormat))
-    dataNascFormat = datetime.strftime(dataNascFormat, '%Y-%m-%d')
-    print('2:', type(dataNascFormat))
-    print('3:', dataNascFormat)
+    # # print(socket.gethostbyaddr)
+    # datanasc = '28/09/2022'
+    # print('1:', type(datanasc))
+    # dataNascFormat = datetime.strptime(datanasc, '%d/%m/%Y').date()
+    # print('2:', type(dataNascFormat))
+    # dataNascFormat = datetime.strftime(dataNascFormat, '%Y-%m-%d')
+    # print('2:', type(dataNascFormat))
+    # print('3:', dataNascFormat)
 
+    url = 'http://localhost:8000/releasemachines/'
 
+    body = [{
+        "date": '2022-11-13',
+        "InitialHour": "10:24:58.444417",
+		"FinishHour": "14:21:00",
+		"idMachineFK": 1,
+		"idAssociateFK": 1
+    }]
+
+    urlpost = requests.post(url, json=body)
+
+    print(urlpost.headers)
+    print(urlpost.json())
+
+    urlID = urlpost.json()
+    print(urlID[0]['id'])
 getData()
